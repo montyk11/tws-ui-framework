@@ -1,7 +1,7 @@
 CMakeFiles/simple_qt_app.dir/src/mainwindow.cpp.o: \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/src/mainwindow.cpp \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/src/mainwindow.cpp \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/stdc-predef.h \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/inc/mainwindow.h \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/inc/mainwindow.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtWidgets/QMainWindow \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtWidgets/qmainwindow.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtWidgets/qtwidgetsglobal.h \
@@ -453,7 +453,7 @@ CMakeFiles/simple_qt_app.dir/src/mainwindow.cpp.o: \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qstringlist.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/QStack \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qstack.h \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/inc/OverlayLabel.h \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/inc/OverlayLabel.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtGui/QPainter \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtGui/qpainter.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtGui/qtextoption.h \
@@ -480,7 +480,7 @@ CMakeFiles/simple_qt_app.dir/src/mainwindow.cpp.o: \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtGui/QTransform \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtGui/qtransform.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qnativeinterface.h \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/inc/capturethread.h \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/inc/capturethread.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/QThread \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qthread.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qdeadlinetimer.h \
@@ -495,6 +495,13 @@ CMakeFiles/simple_qt_app.dir/src/mainwindow.cpp.o: \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtGui/QImage \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtGui/qimage.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/QObject \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/sys/mman.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/bits/mman.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/bits/mman-32.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/bits/mman-map-flags-generic.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/bits/mman-linux.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/bits/mman-shared.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/bits/mman_ext.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/linux/videodev2.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/sys/time.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/linux/ioctl.h \
@@ -515,7 +522,7 @@ CMakeFiles/simple_qt_app.dir/src/mainwindow.cpp.o: \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/linux/v4l2-common.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/linux/v4l2-controls.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/linux/const.h \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/inc/gpio_buttons.h \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/inc/gpio_buttons.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtWidgets/QVBoxLayout \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtWidgets/qboxlayout.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtWidgets/qlayout.h \
@@ -529,4 +536,10 @@ CMakeFiles/simple_qt_app.dir/src/mainwindow.cpp.o: \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qcoreapplication.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qeventloop.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qcoreapplication_platform.h \
- /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qcoreapplication.h
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qcoreapplication.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/QMetaObject \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qobjectdefs.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/QMetaType \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qmetatype.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/QRegularExpression \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qregularexpression.h

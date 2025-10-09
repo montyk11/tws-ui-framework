@@ -5,7 +5,8 @@
 #include <atomic>
 #include <QObject>
 
-// Add this:
+// POSIX headers required for mmap / MAP_FAILED etc.
+#include <sys/mman.h>
 #include <linux/videodev2.h>
 
 extern "C" {
@@ -30,6 +31,8 @@ public:
 public slots:
     // slot/entry point invoked via QMetaObject::invokeMethod from C callback
     Q_INVOKABLE void handleGpioEvent(unsigned int offset, int value);
+    Q_INVOKABLE void setPaletteIndex(int idx);
+
 
 signals:
     void frameReady(const QImage &img);
@@ -42,12 +45,12 @@ private:
     std::atomic<int> &m_palette_atomic;
 
     // V4L2 locals
-    int v4l2_fd;
+    int v4l2_fd = -1;
     struct v4l2_format fmt;
     struct v4l2_buffer buf;
-    void *video_buffer;
-    size_t buf_length;
+    void *video_buffer = nullptr; // initialized to nullptr (mmap result stored as MAP_FAILED in cpp)
+    size_t buf_length = 0;
 
     // GPIO helper
-    struct gpio_buttons *gb;
+    struct gpio_buttons *gb = nullptr;
 };

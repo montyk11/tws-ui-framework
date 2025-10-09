@@ -1,8 +1,8 @@
 CMakeFiles/simple_qt_app.dir/simple_qt_app_autogen/mocs_compilation.cpp.o: \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/simple_qt_app_autogen/mocs_compilation.cpp \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/simple_qt_app_autogen/mocs_compilation.cpp \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/stdc-predef.h \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/simple_qt_app_autogen/DIG64O274K/moc_OverlayLabel.cpp \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/simple_qt_app_autogen/DIG64O274K/../../../inc/OverlayLabel.h \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/simple_qt_app_autogen/DIG64O274K/moc_OverlayLabel.cpp \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/simple_qt_app_autogen/DIG64O274K/../../../inc/OverlayLabel.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtWidgets/QLabel \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtWidgets/qlabel.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtWidgets/qtwidgetsglobal.h \
@@ -473,8 +473,8 @@ CMakeFiles/simple_qt_app.dir/simple_qt_app_autogen/mocs_compilation.cpp.o: \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtGui/qtextcursor.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtGui/qtextformat.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qtmochelpers.h \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/simple_qt_app_autogen/DIG64O274K/moc_capturethread.cpp \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/simple_qt_app_autogen/DIG64O274K/../../../inc/capturethread.h \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/simple_qt_app_autogen/DIG64O274K/moc_capturethread.cpp \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/simple_qt_app_autogen/DIG64O274K/../../../inc/capturethread.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/QThread \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qthread.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qdeadlinetimer.h \
@@ -489,6 +489,13 @@ CMakeFiles/simple_qt_app.dir/simple_qt_app_autogen/mocs_compilation.cpp.o: \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtGui/QImage \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtGui/qimage.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/QObject \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/sys/mman.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/bits/mman.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/bits/mman-32.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/bits/mman-map-flags-generic.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/bits/mman-linux.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/bits/mman-shared.h \
+ /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/bits/mman_ext.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/linux/videodev2.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/sys/time.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/linux/ioctl.h \
@@ -509,9 +516,9 @@ CMakeFiles/simple_qt_app.dir/simple_qt_app_autogen/mocs_compilation.cpp.o: \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/linux/v4l2-common.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/linux/v4l2-controls.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/linux/const.h \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/simple_qt_app_autogen/DIG64O274K/../../../inc/gpio_buttons.h \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/simple_qt_app_autogen/DIG64O274K/moc_mainwindow.cpp \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/simple_qt_app_autogen/DIG64O274K/../../../inc/mainwindow.h \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/simple_qt_app_autogen/DIG64O274K/../../../inc/gpio_buttons.h \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/simple_qt_app_autogen/DIG64O274K/moc_mainwindow.cpp \
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/simple_qt_app_autogen/DIG64O274K/../../../inc/mainwindow.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtWidgets/QMainWindow \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtWidgets/qmainwindow.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtWidgets/qtabwidget.h \
@@ -522,4 +529,4 @@ CMakeFiles/simple_qt_app.dir/simple_qt_app_autogen/mocs_compilation.cpp.o: \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qstringlist.h \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/QStack \
  /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/include/QtCore/qstack.h \
- /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/simple_qt_app_autogen/DIG64O274K/../../../inc/OverlayLabel.h
+ /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/simple_qt_app_autogen/DIG64O274K/../../../inc/OverlayLabel.h

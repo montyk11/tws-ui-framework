@@ -1,3 +1,4 @@
+// mainwindow.cpp (ready-to-paste)
 #include "mainwindow.h"
 #include "capturethread.h"
 #include <QVBoxLayout>
@@ -6,19 +7,31 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include <atomic>
+#include <QMetaObject>
+#include <QMetaType>
+#include <algorithm>
+#include <QStringList>
+#include <QRegularExpression>
 
-static std::atomic<int> palette_mode_global{0};
+// make the GUI global visible to other translation units (not static)
+std::atomic<int> palette_mode_global{0};
 std::atomic<int> &MainWindow::palette_mode_atomic() { return palette_mode_global; }
+
+static const QStringList kPaletteNames = {
+    QString::fromUtf8("IRONBOW"),
+    QString::fromUtf8("RAINBOW"),
+    QString::fromUtf8("ARCTIC"),
+    QString::fromUtf8("LAVA"),
+    QString::fromUtf8("BLACKHOT"),
+    QString::fromUtf8("WHITEHOT"),
+};
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
-    //   m_label(new QLabel(this)),
       m_label(new OverlayLabel(this)),
       m_capture(new CaptureThread(palette_mode_global, this)),
       m_overlayTimer(new QTimer(this)),
       m_menuVisible(false)
-
-
 {
     setCentralWidget(m_label);
     m_label->setAlignment(Qt::AlignCenter);
@@ -27,25 +40,22 @@ MainWindow::MainWindow(QWidget *parent)
 
     // menu initialization
     m_menuItems = QStringList{"Image", "Reticle", "Features", "Battery", "Settings", "Exit", "Power Off"};
-    // m_paletteItems = QStringList{"IRONBOW", "RAINBOW", "ARCTIC", "LAVA", "BLACKHOT", "WHITEHOT"};
 
-    // submenu
-    // m_paletteItems = QStringList{"IRONBOW", "RAINBOW", "ARCTIC", "LAVA", "BLACKHOT", "WHITEHOT"};
-    m_subMenus["Image"]     = {"Brightness", "Contrast", "Filter", "Palette", "Back"};// m_subMenus["Palette"]   = m_paletteItems + QStringList{"Back"};  // nested submenu for palettes
+    // submenu - clean strings
+    m_subMenus["Image"]     = {"Brightness", "Contrast", "Filter", "Palette", "Back"};
     m_subMenus["Brightness"] = {"-  50  +", "Back"};
     m_subMenus["Contrast"] = {"-  50  +", "Back"};
     m_subMenus["Filter"] = {"Sharp", "Smooth", "Normal", "Back"};
     m_subMenus["Palette"] = {"IRONBOW", "RAINBOW", "ARCTIC", "LAVA", "BLACKHOT", "WHITEHOT", "Back"};
-    
+
+    // other submenus
     m_subMenus["Reticle"] = {"Profiles", "Type", "Zeroing", "Red Dot", "On/Off", "Back"};
-    m_subMenus["Profiles"] = {"<  2  >", "Back"}; // Use string indicators for value changes
+    m_subMenus["Profiles"] = {"<  2  >", "Back"};
     m_subMenus["Type"] = {"Crosshair", "7_62x51", "5_45x39", "7_63x45", "7_62x39", "Back"};
     m_subMenus["Zeroing"] = {"X", "Y", "Auto", "Back"};
     m_subMenus["X"] = {"-  0  +", "Back"};
     m_subMenus["Y"] = {"-  0  +", "Back"};
     m_subMenus["Red Dot"] = {"On", "Off", "Back"};
-    
-    // Add more entries for the "Features" menu
     m_subMenus["Features"] = {"Standby", "Auto BPR", "Snapshots", "Recording", "PIP", "Screenshare", "LRF", "Ballistics", "IMU/GPS", "Back"};
     m_subMenus["Standby"] = {"On", "Off", "Back"};
     m_subMenus["Auto BPR"] = {"On", "Off", "Back"};
@@ -59,9 +69,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_subMenus["Ballistics"] = {"Bullet", "Drag Function", "Ballistic Coeff.", "Muzzle Velocity", "Zero Range", "Sight Height", "Back"};
     m_subMenus["IMU/GPS"] = {"Set IMU", "Reset IMU", "IMU Zeroing", "GPS", "Back"};
     m_subMenus["GPS"] = {"On", "Off", "Back"};
-    
     m_subMenus["Battery"]   = {"Percentage %", "Line ||| ", "Life hh:mm", "Back"};
-    
     m_subMenus["Settings"]  = {"1", "2", "3", "4", "Back"};
 
     // Create overlay menu widget (child of m_label so it floats above video)
@@ -74,10 +82,10 @@ MainWindow::MainWindow(QWidget *parent)
     menuLayout->setContentsMargins(5, 5, 5, 5);
 
     for (const QString &item : m_menuItems) {
-    QLabel *lbl = new QLabel(item, m_menuWidget);
-    lbl->setStyleSheet("color: white; font: 14px 'Sans';");
-    menuLayout->addWidget(lbl);
-    m_menuLabels.append(lbl);
+        QLabel *lbl = new QLabel(item, m_menuWidget);
+        lbl->setStyleSheet("color: white; font: 14px 'Sans';");
+        menuLayout->addWidget(lbl);
+        m_menuLabels.append(lbl);
     }
     m_menuWidget->hide();
 
@@ -88,20 +96,20 @@ MainWindow::MainWindow(QWidget *parent)
     QVBoxLayout *subLayout = new QVBoxLayout(m_subMenuWidget);
     subLayout->setContentsMargins(5,5,5,5);
     m_subMenuWidget->hide();
-    
+
     // Use queued connection for cross-thread signal delivery
     connect(m_capture, &CaptureThread::frameReady, this, &MainWindow::onFrameReady, Qt::QueuedConnection);
     connect(m_capture, &CaptureThread::paletteIndexChanged, this, &MainWindow::onPaletteChanged, Qt::QueuedConnection);
 
     // connect gpio events forwarded by CaptureThread
     connect(m_capture, &CaptureThread::gpioPressed, this, &MainWindow::onGpioPressed, Qt::QueuedConnection);
-    // Connect the signal from the CaptureThread to the slot in MainWindow
-    //connect(m_capture, &CaptureThread::imuDataReady, this, &MainWindow::onImuDataReady);
 
+    qDebug() << "[MainWindow] m_capture pointer:" << m_capture;
 
     m_capture->start();
 
-    // sync with thread's palette at start
+    // quick sanity: set palette to 0 initially (keeps UI consistent)
+    palette_mode_global.store(0);
     m_currentPalette = (int)palette_mode_global.load();
     m_paletteIndex = m_currentPalette;
 
@@ -119,31 +127,28 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::onImuDataReady(float pitch, float roll, float yaw) {
-    m_pitch = 10.0f;//pitch;
-    m_roll = 45.0f;//roll;
-    m_yaw = -30.0f;//yaw;
-    // Request a repaint to draw the new lines
-    m_label->update(); 
+    Q_UNUSED(pitch); Q_UNUSED(roll); Q_UNUSED(yaw);
+    m_label->update();
 }
 
 void MainWindow::updateMenuHighlight()
 {
-        for (int i = 0; i < m_menuLabels.size(); ++i) {
-            if (i == m_menuIndex) {
-                m_menuLabels[i]->setStyleSheet(
-                    "background-color: rgba(235, 109, 25, 181);"
-                    "color: white;"
-                    "font: bold 14px 'Sans';"
-                    "padding: 4px;"
-                    "border-radius: 4px;");
-            } else {
-                m_menuLabels[i]->setStyleSheet(
-                    "background-color: transparent;"
-                    "color: white;"
-                    "font: 14px 'Sans';"
-                    "padding: 4px;");
+    for (int i = 0; i < m_menuLabels.size(); ++i) {
+        if (i == m_menuIndex) {
+            m_menuLabels[i]->setStyleSheet(
+                "background-color: rgba(235, 109, 25, 181);"
+                "color: white;"
+                "font: bold 14px 'Sans';"
+                "padding: 4px;"
+                "border-radius: 4px;");
+        } else {
+            m_menuLabels[i]->setStyleSheet(
+                "background-color: transparent;"
+                "color: white;"
+                "font: 14px 'Sans';"
+                "padding: 4px;");
         }
-    } 
+    }
 }
 
 void MainWindow::updateSubMenuHighlight()
@@ -176,7 +181,6 @@ void MainWindow::onFrameReady(const QImage &img)
         return;
     }
 
-    // Drop frame if previous frame is still being processed by GUI
     static std::atomic<bool> busy{false};
     if (busy.exchange(true)) {
         // skip this frame
@@ -195,16 +199,9 @@ void MainWindow::onFrameReady(const QImage &img)
     // Draw palette name (bottom right)
     p.setPen(Qt::white);
     p.setFont(QFont("Monospace", 12, QFont::Bold));
-    QString name = CaptureThread::paletteName((int)palette_mode_global.load());
-    p.drawText(750, 395, name); 
-
-    // Draw menu overlay only if visible
-    // if (m_menuVisible) {
-    //     drawMenuOverlay(p, display);
-    // }
-
-    // Draw menu overlay (if visible) using the *same* painter (no nested painters)
-    // drawMenuOverlay(p, display);
+    int currentIdx = (int)palette_mode_global.load();
+    QString name = CaptureThread::paletteName(currentIdx);
+    p.drawText(550, 470, QString("Palette: %1 (%2)").arg(name).arg(currentIdx));
 
     p.end();
 
@@ -216,19 +213,53 @@ void MainWindow::onFrameReady(const QImage &img)
 void MainWindow::onPaletteChanged(int idx)
 {
     m_currentPalette = idx;
-    // When capture thread changes palette (e.g. keyboard), reflect it in UI
     m_paletteIndex = m_currentPalette;
+    qDebug() << "[MainWindow] onPaletteChanged idx =" << idx << "name:" << CaptureThread::paletteName(idx);
+}
+
+// sanitize item text coming from various code paths (strip whitespace, remove surrounding quotes)
+static QString sanitizeMenuItem(const QString &raw)
+{
+    QString s = raw.trimmed();
+
+    // Remove surrounding double quotes if present: "RAINBOW" -> RAINBOW
+    if (s.size() >= 2 && s.front() == '"' && s.back() == '"') {
+        s = s.mid(1, s.size() - 2).trimmed();
+    }
+
+    // Also remove surrounding single quotes if present
+    if (s.size() >= 2 && s.front() == '\'' && s.back() == '\'') {
+        s = s.mid(1, s.size() - 2).trimmed();
+    }
+
+    // collapse multiple spaces
+    s = s.simplified();
+
+    return s;
+}
+
+static int findPaletteIndexByName(const QString &name)
+{
+    QString s = sanitizeMenuItem(name);
+    for (int i = 0; i < kPaletteNames.size(); ++i) {
+        if (s.compare(kPaletteNames[i], Qt::CaseInsensitive) == 0) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if (!event) return;
     int k = event->key();
-    // number keys 0..5 -> direct palette select
     if (k >= Qt::Key_0 && k <= Qt::Key_5) {
         int idx = k - Qt::Key_0;
+        qDebug() << "[MainWindow] key pressed, palette idx:" << idx;
         palette_mode_global.store(idx);
-        emit m_capture->paletteIndexChanged(idx);
+        bool invoked = QMetaObject::invokeMethod(m_capture, "setPaletteIndex", Qt::QueuedConnection, Q_ARG(int, idx));
+        qDebug() << "[MainWindow] invokeMethod(setPaletteIndex) returned" << invoked << "for idx" << idx;
+        if (!invoked) qWarning() << "[MainWindow] invokeMethod failed — slot not registered";
     } else if (k == Qt::Key_Q || k == Qt::Key_Escape) {
         close();
     } else {
@@ -236,103 +267,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     }
 }
 
-// Updated drawMenuOverlay: accepts an active QPainter& (no nested painters)
-// void MainWindow::drawMenuOverlay(QPainter &p, QImage &image)
-// {
-//     Q_UNUSED(image);
-//     p.setRenderHint(QPainter::Antialiasing, true);
-//     // panel background
-//     int panelW = 200;
-//     int cellH = 28;
-//     int x = 210;
-//     int y = 10;
-//     int rows = m_inSubmenu ? m_paletteItems.size() : m_menuItems.size();
-//     // Draw a translucent dark background
-//     p.setPen(Qt::NoPen);
-//     p.setBrush(QColor(0,0,0,160));
-//     p.drawRoundedRect(x-8, y-8, panelW, (rows+1)*cellH, 6, 6);
-//     // Draw each row
-//     for (int i=0; i<rows; ++i) {
-//         int ry = y + i * cellH;
-//         QString text;
-//         bool highlighted = false;
-//         if (m_inSubmenu) {
-//             text = m_paletteItems.at(i);
-//             highlighted = (i == m_paletteIndex);
-//         } else {
-//             text = m_menuItems.at(i);
-//             highlighted = (i == m_menuIndex);
-//         }
-//         if (highlighted) {
-//             // highlight background
-//             p.setBrush(QColor(255,255,255,30));
-//             p.setPen(Qt::NoPen);
-//             p.drawRect(x-6, ry-2, panelW-12, cellH-2);
-//         }
-//         // draw text
-//         p.setPen(Qt::white);
-//         p.setFont(QFont("Sans", 12));
-//         p.drawText(x, ry + 20, text);
-//     }
-//     // draw small instructions
-//     p.setFont(QFont("Sans", 10));
-//     p.setPen(QColor(200,200,200));
-//     p.drawText(x, y + (rows+1)*cellH - 6, "PF0=Up  PF1=Down  PF6=Enter");
-// }
-
-// void MainWindow::onGpioPressed(unsigned int offset, int value)
-// {
-//     qDebug() << "GPIO event offset=" << offset << " value=" << value;
-//     // we only react on button press (value == 0 is pressed in your platform)
-//     if (value != 0) return;
-//     // NOTE: adjust offsets if your gpio mapping differs.
-//     // PF0 -> offset 0, PF1 -> offset 1, PF6 -> offset 6 (per your offsets[] = {0,1,4,6})
-//     const unsigned int PF0 = 0;// up
-//     const unsigned int PF1 = 1;//down
-//     const unsigned int PF6 = 6; // enter
-//     if (offset == PF6) {
-//         if (!m_menuVisible) {
-//             m_menuWidget->show();
-//             m_menuVisible = true;
-//             updateMenuHighlight();
-//             return;
-//         }
-//     }
-//     if (!m_inSubmenu) {
-//         if (offset == PF0) { // up
-//             int n = m_menuItems.size();
-//             m_menuIndex = (m_menuIndex - 1 + n) % n;
-//             updateMenuHighlight();
-//         } else if (offset == PF1) { // down
-//             int n = m_menuItems.size();
-//             m_menuIndex = (m_menuIndex + 1) % n;
-//             updateMenuHighlight();
-//         } else if (offset == PF6) { // enter
-//             enterMenuItem();
-//         }
-//     } else {
-//         // submenu (color palettes)
-//          if (offset == PF0) { // up
-//         int n = m_subMenuLabels.size();
-//         m_subMenuIndex = (m_subMenuIndex - 1 + n) % n;
-//         updateSubMenuHighlight();
-//     } else if (offset == PF1) { // down
-//         int n = m_subMenuLabels.size();
-//         m_subMenuIndex = (m_subMenuIndex + 1) % n;
-//         updateSubMenuHighlight();
-//     } else if (offset == PF6) { // enter
-//         QString choice = m_subMenuLabels[m_subMenuIndex]->text();
-//         if (choice == "Back") {
-//             m_subMenuWidget->hide();
-//             m_inSubmenu = false;
-//         } else {
-//             qDebug() << "Selected submenu:" << choice;
-//         }
-//     }
-// }
-// }
-
 void MainWindow::onGpioPressed(unsigned int offset, int value) {
+    qDebug() << "[GPIO] offset:" << offset << "value:" << value;
+    
     if (value != 0) return; // Only process button press
 
     const unsigned int PF0 = 0; // Up
@@ -341,31 +278,34 @@ void MainWindow::onGpioPressed(unsigned int offset, int value) {
 
     if (!m_menuVisible) {
         if (offset == PF6) {
+            qDebug() << "[GPIO] Opening menu";
             m_menuVisible = true;
             m_menuWidget->show();
             m_currentMenuWidget = m_menuWidget;
             m_menuIndex = 0;
             updateMenuHighlight();
         }
-        return; // Menu is not active, so other buttons do nothing
+        return;
     }
 
-    if (m_currentMenuWidget == m_menuWidget) { // Main menu is active
-        if (offset == PF0) { // Up
+    if (m_currentMenuWidget == m_menuWidget) {
+        if (offset == PF0) {
             m_menuIndex = (m_menuIndex - 1 + m_menuItems.size()) % m_menuItems.size();
-        } else if (offset == PF1) { // Down
+        } else if (offset == PF1) {
             m_menuIndex = (m_menuIndex + 1) % m_menuItems.size();
-        } else if (offset == PF6) { // Enter
-            enterMenuItem(m_menuLabels.at(m_menuIndex)->text());
+        } else if (offset == PF6) {
+            QString selectedItem = m_menuLabels.at(m_menuIndex)->text();
+            enterMenuItem(selectedItem);
         }
         updateMenuHighlight();
-    } else if (m_currentMenuWidget == m_subMenuWidget) { // Submenu is active
-        if (offset == PF0) { // Up
+    } else if (m_currentMenuWidget == m_subMenuWidget) {
+        if (offset == PF0) {
             m_subMenuIndex = (m_subMenuIndex - 1 + m_subMenuLabels.size()) % m_subMenuLabels.size();
-        } else if (offset == PF1) { // Down
+        } else if (offset == PF1) {
             m_subMenuIndex = (m_subMenuIndex + 1) % m_subMenuLabels.size();
-        } else if (offset == PF6) { // Enter
-            enterSubMenuItem(m_subMenuLabels.at(m_subMenuIndex)->text());
+        } else if (offset == PF6) {
+            QString selectedItem = m_subMenuLabels.at(m_subMenuIndex)->text();
+            enterSubMenuItem(selectedItem);
         }
         updateSubMenuHighlight();
     }
@@ -373,8 +313,6 @@ void MainWindow::onGpioPressed(unsigned int offset, int value) {
 
 void MainWindow::buildSubMenu(const QString &menuName)
 {
-    // if (!m_subMenus.contains(menuName)) return;
-
     QLayout *oldLayout = m_subMenuWidget->layout();
     if (oldLayout) {
         QLayoutItem *child;
@@ -386,6 +324,8 @@ void MainWindow::buildSubMenu(const QString &menuName)
     m_subMenuLabels.clear();
 
     QVBoxLayout *subLayout = static_cast<QVBoxLayout*>(m_subMenuWidget->layout());
+    if (!m_subMenus.contains(menuName)) return;
+
     for (const QString &subItem : m_subMenus[menuName]) {
         QLabel *lbl = new QLabel(subItem, m_subMenuWidget);
         lbl->setStyleSheet("color: white; font: 14px 'Sans';");
@@ -398,103 +338,105 @@ void MainWindow::buildSubMenu(const QString &menuName)
 
     m_subMenuWidget->show();
     m_inSubmenu = true;
-    m_currentMenuWidget = m_subMenuWidget; // Add this line
+    m_currentMenuWidget = m_subMenuWidget;
 }
 
 void MainWindow::enterMenuItem(const QString &item)
 {
-    // QString item = m_menuItems.at(m_menuIndex);
-
-    if (m_subMenus.contains(item)) {
-        // open submenu for this item
+    QString san = sanitizeMenuItem(item);
+    if (m_subMenus.contains(san)) {
         m_subMenuWidget->hide();
-        m_menuHistory.push(item);
-        buildSubMenu(item);
-    }
-    else if (item == "Exit") {
+        m_menuHistory.push(san);
+        buildSubMenu(san);
+    } else if (san == "Exit") {
         m_menuWidget->hide();
+        m_subMenuWidget->hide();
         m_menuVisible = false;
         m_menuHistory.clear();
-    }
-    else if (item == "Power Off") {
+    } else if (san == "Power Off") {
         QCoreApplication::quit();
     }
-    // else {
-    //     qDebug() << "Selected menu item:" << item;
-    // }
-}
-
-void MainWindow::handleAction(const QString &item) {
-    // Implement logic for each action item here
-    qDebug() << "Handling action for:" << item;
-
-    if (item == "On") {
-        // Logic to turn a feature on
-    } else if (item == "Off") {
-        // Logic to turn a feature off
-    }
-    // Add more if/else statements for other actions
 }
 
 void MainWindow::enterSubMenuItem(const QString &item)
 {
-    // QString choice = m_subMenuLabels[m_subMenuIndex]->text();
+    QString san = sanitizeMenuItem(item);
 
-    if (/*choice*/item == "Back") {
+    if (san == "Back") {
         m_subMenuWidget->hide();
         if(!m_menuHistory.isEmpty()){
             m_menuHistory.pop();
             if (m_menuHistory.isEmpty()) {
                 m_menuWidget->show();
                 m_currentMenuWidget = m_menuWidget;
+                m_inSubmenu = false;
             } else {
                 buildSubMenu(m_menuHistory.top());
             }
         } else {
-            // Should not happen if logic is correct, but good to handle
             m_menuVisible = false;
+            m_menuWidget->hide();
         }
         return;
-        
-        // m_inSubmenu = false;
-        // return;
     }
 
-    // if this submenu has further nested submenu
-    if (m_subMenus.contains(item/*choice*/)) {
+    if (m_subMenus.contains(san)) {
         m_subMenuWidget->hide();
-        m_menuHistory.push(item);
-        buildSubMenu(item/*choice*/);
-        //return;
-    }
-     else {
-        handleAction(item);
+        m_menuHistory.push(san);
+        buildSubMenu(san);
+        return;
     }
 
-    // if it's a palette
-    // if (m_paletteItems.contains(choice)) {
-    //     int idx = m_paletteItems.indexOf(choice);
-    //     if (idx >= 0) {
-    //         palette_mode_global.store(idx);
-    //         emit m_capture->paletteIndexChanged(idx);
-    //         m_currentPalette = idx;
-    //         qDebug() << "Palette selected:" << choice;
-    //     }
-    //     m_subMenuWidget->hide();
-    //     m_inSubmenu = false;
-    //     return;
-    // }
+    int idx = findPaletteIndexByName(san);
+    if (idx >= 0) {
+        qDebug() << "[enterSubMenuItem] PALETTE selected:" << san << " idx=" << idx;
+        palette_mode_global.store(idx);
+        bool invoked = QMetaObject::invokeMethod(m_capture, "setPaletteIndex", Qt::QueuedConnection, Q_ARG(int, idx));
+        qDebug() << "[MainWindow] invokeMethod(setPaletteIndex) returned" << invoked << "for idx" << idx;
+        m_currentPalette = idx;
+        m_paletteIndex = idx;
+        m_subMenuWidget->hide();
+        m_inSubmenu = false;
+        return;
+    }
 
-    // handle other features (Brightness, Contrast, etc.)
-    // qDebug() << "Selected submenu:" << choice;
+    handleAction(san);
+}
+
+void MainWindow::handleAction(const QString &item) {
+    QString san = sanitizeMenuItem(item);
+    int pidx = findPaletteIndexByName(san);
+    if (pidx >= 0) {
+        qDebug() << "[MainWindow::handleAction] detected palette:" << san << "idx:" << pidx;
+        palette_mode_global.store(pidx);
+        bool invoked = QMetaObject::invokeMethod(m_capture, "setPaletteIndex",
+                                                 Qt::QueuedConnection,
+                                                 Q_ARG(int, pidx));
+        qDebug() << "[MainWindow] invokeMethod(setPaletteIndex) returned" << invoked << "for idx" << pidx;
+        return;
+    }
+
+    if (san.compare("On", Qt::CaseInsensitive) == 0) {
+        qDebug() << "[MainWindow::handleAction] ON action";
+        return;
+    }
+    if (san.compare("Off", Qt::CaseInsensitive) == 0) {
+        qDebug() << "[MainWindow::handleAction] OFF action";
+        return;
+    }
+
+    qDebug() << "[MainWindow::handleAction] no-op for:" << san;
 }
 
 void MainWindow::applySelectedPalette()
 {
-    if (m_paletteIndex >= 0 && m_paletteIndex < m_paletteItems.size()) {
-        palette_mode_global.store(m_paletteIndex);
-        emit m_capture->paletteIndexChanged(m_paletteIndex);
-        m_currentPalette = m_paletteIndex;
-        qDebug() << "Palette selected:" << m_paletteItems.at(m_paletteIndex);
+    if (m_subMenus.contains("Palette") && m_paletteIndex >= 0 && m_paletteIndex < m_subMenus["Palette"].size()-1) {
+        int idx = m_paletteIndex;
+        qDebug() << "[applySelectedPalette] idx:" << idx;
+        palette_mode_global.store(idx);
+        bool invoked = QMetaObject::invokeMethod(m_capture, "setPaletteIndex", Qt::QueuedConnection, Q_ARG(int, idx));
+        qDebug() << "[applySelectedPalette] invokeMethod(setPaletteIndex) returned" << invoked << "for idx" << idx;
+        if (!invoked) qWarning() << "[applySelectedPalette] invokeMethod failed";
+        m_currentPalette = idx;
     }
 }

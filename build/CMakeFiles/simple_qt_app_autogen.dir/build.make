@@ -53,10 +53,10 @@ RM = /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt
+CMAKE_SOURCE_DIR = /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build
+CMAKE_BINARY_DIR = /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build
 
 # Utility rule file for simple_qt_app_autogen.
 
@@ -71,9 +71,9 @@ CMakeFiles/simple_qt_app_autogen: simple_qt_app_autogen/timestamp
 simple_qt_app_autogen/timestamp: /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/x86_64-ostl_sdk-linux/usr/libexec/moc
 simple_qt_app_autogen/timestamp: /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/x86_64-ostl_sdk-linux/usr/libexec/uic
 simple_qt_app_autogen/timestamp: CMakeFiles/simple_qt_app_autogen.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC and UIC for target simple_qt_app"
-	/home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/x86_64-ostl_sdk-linux/usr/bin/cmake -E cmake_autogen /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/simple_qt_app_autogen.dir/AutogenInfo.json Release
-	/home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/x86_64-ostl_sdk-linux/usr/bin/cmake -E touch /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/simple_qt_app_autogen/timestamp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC and UIC for target simple_qt_app"
+	/home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/x86_64-ostl_sdk-linux/usr/bin/cmake -E cmake_autogen /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/CMakeFiles/simple_qt_app_autogen.dir/AutogenInfo.json ""
+	/home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/x86_64-ostl_sdk-linux/usr/bin/cmake -E touch /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/simple_qt_app_autogen/timestamp
 
 simple_qt_app_autogen: CMakeFiles/simple_qt_app_autogen
 simple_qt_app_autogen: simple_qt_app_autogen/timestamp
@@ -89,6 +89,6 @@ CMakeFiles/simple_qt_app_autogen.dir/clean:
 .PHONY : CMakeFiles/simple_qt_app_autogen.dir/clean
 
 CMakeFiles/simple_qt_app_autogen.dir/depend:
-	cd /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/simple_qt_app_autogen.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/CMakeFiles/simple_qt_app_autogen.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/simple_qt_app_autogen.dir/depend
 

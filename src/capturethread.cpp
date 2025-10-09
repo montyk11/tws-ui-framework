@@ -1,4 +1,4 @@
-// capturethread.cpp
+// capturethread.cpp (defensive, ready-to-paste)
 #include "capturethread.h"
 #include <QDebug>
 #include <QImage>
@@ -14,6 +14,10 @@
 #include <time.h>
 #include <QMetaObject>
 #include <jpeglib.h>
+#include <atomic>
+
+// GUI global visible to this translation unit (declared in mainwindow.cpp)
+extern std::atomic<int> palette_mode_global;
 
 static const int WIDTH = 640;
 static const int HEIGHT = 480;
@@ -29,10 +33,11 @@ CaptureThread::CaptureThread(std::atomic<int> &palette_atomic, QObject *parent)
       m_running(false),
       m_palette_atomic(palette_atomic),
       v4l2_fd(-1),
-      video_buffer(MAP_FAILED),
+      video_buffer(nullptr),
       buf_length(0),
       gb(nullptr)
 {
+    qDebug() << "[CaptureThread] constructed this=" << this << " palette_atomic addr=" << &m_palette_atomic;
 }
 
 CaptureThread::~CaptureThread()
@@ -42,11 +47,23 @@ CaptureThread::~CaptureThread()
 
 const char* CaptureThread::paletteName(int idx)
 {
+    if (idx < 0) idx = 0;
     idx = idx % NUM_PALETTES;
     return palette_names[idx];
 }
 
-/* Palette conversion logic (same as before) */
+void CaptureThread::setPaletteIndex(int idx)
+{
+    qDebug() << "[CaptureThread::setPaletteIndex] called with idx=" << idx;
+    if (idx < 0) idx = 0;
+    if (idx >= NUM_PALETTES) idx = idx % NUM_PALETTES;
+    m_palette_atomic.store(idx);
+    palette_mode_global.store(idx);
+    emit paletteIndexChanged(idx);
+    qDebug() << "[CaptureThread::setPaletteIndex] stored idx =" << idx << "(" << paletteName(idx) << ")";
+}
+
+/* Palette conversion helper */
 static void gray_to_color_palette(uint16_t gray, uint8_t &r, uint8_t &g, uint8_t &b, int mode) {
     uint8_t v = gray >> 8;
     switch (mode) {
@@ -65,17 +82,11 @@ static void gray_to_color_palette(uint16_t gray, uint8_t &r, uint8_t &g, uint8_t
     }
 }
 
-/*
- * C callback used by gpio_buttons. The 'user' pointer is expected to be a
- * CaptureThread* (passed when registering). This function forwards the
- * event into the CaptureThread via QMetaObject::invokeMethod so the
- * event is delivered in Qt's event/queue system.
- */
+/* gpio callback -> forwards into thread object */
 static void gpio_button_cb(unsigned int offset, int value, void *user)
 {
     if (!user) return;
     CaptureThread *ct = reinterpret_cast<CaptureThread*>(user);
-
     QMetaObject::invokeMethod(ct, "handleGpioEvent", Qt::QueuedConnection,
                               Q_ARG(unsigned int, offset),
                               Q_ARG(int, value));
@@ -86,15 +97,7 @@ void CaptureThread::handleGpioEvent(unsigned int offset, int value)
     emit gpioPressed(offset, value);
 }
 
-/* -------------------- MJPEG decompress helper (in-place) -------------------- */
-/* decompress_mjpeg_to_rgb_inplace:
- *   in_buf/in_size -> input JPEG bytes
- *   out_buf/out_buf_sz -> preallocated buffer to write RGB24 into
- *   out_w/out_h/out_components -> returns image size and components (components usually 3)
- *
- * Writes RGB24 scanlines directly into out_buf as row-major RGBRGB...
- * Returns 0 on success, -1 on failure.
- */
+/* MJPEG decompress helper (uses libjpeg) */
 static int decompress_mjpeg_to_rgb_inplace(const uint8_t *in_buf, size_t in_size,
                                            uint8_t *out_buf, size_t out_buf_sz,
                                            int *out_w, int *out_h, int *out_components)
@@ -118,12 +121,11 @@ static int decompress_mjpeg_to_rgb_inplace(const uint8_t *in_buf, size_t in_size
 
     *out_w = cinfo.output_width;
     *out_h = cinfo.output_height;
-    *out_components = cinfo.output_components; // expected 3 (RGB)
+    *out_components = cinfo.output_components;
 
     size_t row_stride = (size_t)(*out_w) * (size_t)(*out_components);
     size_t needed = row_stride * (size_t)(*out_h);
     if (needed > out_buf_sz) {
-        // provided buffer too small
         jpeg_finish_decompress(&cinfo);
         jpeg_destroy_decompress(&cinfo);
         return -1;
@@ -132,8 +134,7 @@ static int decompress_mjpeg_to_rgb_inplace(const uint8_t *in_buf, size_t in_size
     while (cinfo.output_scanline < cinfo.output_height) {
         size_t y = cinfo.output_scanline;
         rowptr[0] = out_buf + y * row_stride;
-        int ret = jpeg_read_scanlines(&cinfo, rowptr, 1);
-        if (ret != 1) {
+        if (jpeg_read_scanlines(&cinfo, rowptr, 1) != 1) {
             jpeg_finish_decompress(&cinfo);
             jpeg_destroy_decompress(&cinfo);
             return -1;
@@ -144,132 +145,139 @@ static int decompress_mjpeg_to_rgb_inplace(const uint8_t *in_buf, size_t in_size
     jpeg_destroy_decompress(&cinfo);
     return 0;
 }
-/* --------------------------------------------------------------------------- */
 
 void CaptureThread::run()
 {
     m_running = true;
+    qDebug() << "[CaptureThread] run() starting";
 
-    // Open V4L2 device
     v4l2_fd = open(VIDEO_DEVICE, O_RDWR);
     if (v4l2_fd < 0) {
-        qWarning() << "Failed to open video device" << VIDEO_DEVICE << strerror(errno);
+        qWarning() << "Failed to open video device" << VIDEO_DEVICE << ":" << strerror(errno);
+        m_running = false;
         return;
     }
 
-    // Set V4L2 format to MJPEG (640x480)
-    struct v4l2_format fmt;
-    memset(&fmt, 0, sizeof(fmt));
-    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    fmt.fmt.pix.width = WIDTH;
-    fmt.fmt.pix.height = HEIGHT;
-    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;   // MJPEG!
-    fmt.fmt.pix.field = V4L2_FIELD_NONE;
-    if (ioctl(v4l2_fd, VIDIOC_S_FMT, &fmt) < 0) {
+    // set format
+    struct v4l2_format local_fmt;
+    memset(&local_fmt, 0, sizeof(local_fmt));
+    local_fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    local_fmt.fmt.pix.width = WIDTH;
+    local_fmt.fmt.pix.height = HEIGHT;
+    local_fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
+    local_fmt.fmt.pix.field = V4L2_FIELD_NONE;
+    if (ioctl(v4l2_fd, VIDIOC_S_FMT, &local_fmt) < 0) {
         qWarning() << "VIDIOC_S_FMT failed:" << strerror(errno);
-        cleanup(); return;
+        close(v4l2_fd);
+        v4l2_fd = -1;
+        m_running = false;
+        return;
     }
 
-    // Request multiple buffers for smoother streaming
+    // request buffers
     struct v4l2_requestbuffers req;
     memset(&req, 0, sizeof(req));
-    req.count = 4; // use 4 buffers (helps smoothness)
+    req.count = 4;
     req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory = V4L2_MEMORY_MMAP;
     if (ioctl(v4l2_fd, VIDIOC_REQBUFS, &req) < 0) {
         qWarning() << "VIDIOC_REQBUFS failed:" << strerror(errno);
-        cleanup(); return;
+        close(v4l2_fd); v4l2_fd = -1; m_running = false; return;
     }
 
-    // Query and mmap each buffer
-    struct v4l2_buffer *bufs = (struct v4l2_buffer*)calloc(req.count, sizeof(struct v4l2_buffer));
-    void **mapped_ptrs = (void**)calloc(req.count, sizeof(void*));
+    // container for buffers
+    struct v4l2_buffer *bufs = nullptr;
+    void **mapped_ptrs = nullptr;
+    bufs = (struct v4l2_buffer*)calloc(req.count, sizeof(struct v4l2_buffer));
+    mapped_ptrs = (void**)calloc(req.count, sizeof(void*));
     if (!bufs || !mapped_ptrs) {
-        qWarning() << "Out of memory for buffer structures";
-        free(bufs);
-        free(mapped_ptrs);
-        cleanup(); return;
+        qWarning() << "Out of memory allocating bufs/mapped_ptrs";
+        free(bufs); free(mapped_ptrs);
+        close(v4l2_fd); v4l2_fd = -1; m_running = false; return;
     }
 
-    for (uint32_t i = 0; i < req.count; ++i) {
+    bool buffers_ok = true;
+    for (uint32_t i = 0; i < (uint32_t)req.count; ++i) {
         memset(&bufs[i], 0, sizeof(struct v4l2_buffer));
         bufs[i].type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         bufs[i].memory = V4L2_MEMORY_MMAP;
         bufs[i].index = i;
         if (ioctl(v4l2_fd, VIDIOC_QUERYBUF, &bufs[i]) < 0) {
             qWarning() << "VIDIOC_QUERYBUF failed for index" << i << ":" << strerror(errno);
-            for (uint32_t j = 0; j < i; ++j) if (mapped_ptrs[j]) munmap(mapped_ptrs[j], bufs[j].length);
-            free(bufs);
-            free(mapped_ptrs);
-            cleanup(); return;
+            buffers_ok = false;
+            break;
         }
         mapped_ptrs[i] = mmap(NULL, bufs[i].length, PROT_READ | PROT_WRITE, MAP_SHARED, v4l2_fd, bufs[i].m.offset);
         if (mapped_ptrs[i] == MAP_FAILED) {
             qWarning() << "mmap failed for index" << i << ":" << strerror(errno);
-            for (uint32_t j = 0; j < i; ++j) if (mapped_ptrs[j]) munmap(mapped_ptrs[j], bufs[j].length);
-            free(bufs);
-            free(mapped_ptrs);
-            cleanup(); return;
+            mapped_ptrs[i] = nullptr;
+            buffers_ok = false;
+            break;
         }
-        // queue buffer
         if (ioctl(v4l2_fd, VIDIOC_QBUF, &bufs[i]) < 0) {
             qWarning() << "VIDIOC_QBUF failed for index" << i << ":" << strerror(errno);
-            for (uint32_t j = 0; j <= i; ++j) if (mapped_ptrs[j]) munmap(mapped_ptrs[j], bufs[j].length);
-            free(bufs);
-            free(mapped_ptrs);
-            cleanup(); return;
+            buffers_ok = false;
+            break;
         }
     }
 
-    // Save the first mapped pointer for backward compatibility with your code
+    if (!buffers_ok) {
+        qWarning() << "Buffer setup unsuccessful - cleaning up";
+        for (uint32_t j = 0; j < (uint32_t)req.count; ++j) {
+            if (mapped_ptrs[j]) munmap(mapped_ptrs[j], bufs[j].length);
+        }
+        free(bufs); free(mapped_ptrs);
+        close(v4l2_fd); v4l2_fd = -1;
+        m_running = false;
+        return;
+    }
+
+    // store first buffer info for legacy members
     video_buffer = mapped_ptrs[0];
     buf_length = bufs[0].length;
 
-    // Start streaming
+    // start stream
     int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (ioctl(v4l2_fd, VIDIOC_STREAMON, &type) < 0) {
         qWarning() << "VIDIOC_STREAMON failed:" << strerror(errno);
-        for (uint32_t i = 0; i < req.count; ++i) if (mapped_ptrs[i]) munmap(mapped_ptrs[i], bufs[i].length);
-        free(bufs);
-        free(mapped_ptrs);
-        cleanup(); return;
+        for (uint32_t i = 0; i < (uint32_t)req.count; ++i) if (mapped_ptrs[i]) munmap(mapped_ptrs[i], bufs[i].length);
+        free(bufs); free(mapped_ptrs);
+        close(v4l2_fd); v4l2_fd = -1;
+        m_running = false;
+        return;
     }
 
-    // Initialize gpio_buttons if available
+    // Try to initialize gpio buttons but tolerate failures (don't crash)
     const unsigned int offsets[] = {0,1,4,6};
     const char *names[] = {"PF0","PF1","PF4","PF6"};
     gb = gpio_buttons_create("/dev/gpiochip5", offsets, names, 4, 200, 20000);
     if (!gb) {
-        qWarning() << "Warning: gpio_buttons_create failed — continuing without gpio";
+        qDebug() << "gpio_buttons_create returned NULL (not fatal)";
     } else {
-        for (int i = 0; i < 4; ++i) {
-            gpio_buttons_register_callback(gb, i, gpio_button_cb, this);
-        }
+        for (int i = 0; i < 4; ++i) gpio_buttons_register_callback(gb, i, gpio_button_cb, this);
         gpio_buttons_start(gb);
     }
 
-    // -------------------------
-    // Precompute palette LUTs
-    // -------------------------
+    // Precompute palette LUT
     uint32_t palette_lut[NUM_PALETTES][256];
     for (int p = 0; p < NUM_PALETTES; ++p) {
         for (int v = 0; v < 256; ++v) {
-            uint8_t r, g, b;
+            uint8_t r,g,b;
             uint16_t gray16 = (uint16_t)(v << 8);
             gray_to_color_palette(gray16, r, g, b, p);
-            palette_lut[p][v] = qRgba(r, g, b, 0xFF);
+            palette_lut[p][v] = qRgba(r,g,b,0xFF);
         }
     }
 
-    // Preallocate a single decoded buffer (RGB24): WIDTH*HEIGHT*3 bytes
     size_t max_decoded_sz = (size_t)WIDTH * (size_t)HEIGHT * 3;
     uint8_t *reusable_decoded = (uint8_t*)malloc(max_decoded_sz);
     if (!reusable_decoded) {
-        qWarning() << "Failed to allocate reusable decoded buffer of size" << (long)max_decoded_sz;
-        // we'll continue but decoding will fail
+        qWarning() << "Failed to allocate decoded buffer; will skip decode";
     }
 
-    // Main capture loop
+    qDebug() << "[CaptureThread] streaming started";
+
+    // frame loop
     while (m_running) {
         struct v4l2_buffer dq;
         memset(&dq, 0, sizeof(dq));
@@ -281,50 +289,42 @@ void CaptureThread::run()
             break;
         }
 
-        // pointer to the dequeued buffer's memory
-        uint8_t *buf_ptr = reinterpret_cast<uint8_t*>(mapped_ptrs[dq.index]);
+        // pointer safe check
+        uint8_t *buf_ptr = nullptr;
+        if ((uint32_t)dq.index < (uint32_t)req.count) buf_ptr = reinterpret_cast<uint8_t*>(mapped_ptrs[dq.index]);
         size_t jpeg_size = dq.bytesused;
         int dec_w = 0, dec_h = 0, dec_components = 0;
         bool decode_ok = false;
 
-        // Quick JPEG magic check
-        if (jpeg_size >= 3 && buf_ptr[0] == 0xFF && buf_ptr[1] == 0xD8 && buf_ptr[2] == 0xFF) {
-            if (reusable_decoded) {
-                if (decompress_mjpeg_to_rgb_inplace(buf_ptr, jpeg_size,
-                                                    reusable_decoded, max_decoded_sz,
-                                                    &dec_w, &dec_h, &dec_components) == 0) {
-                    decode_ok = true;
-                } else {
-                    qWarning() << "Inplace MJPEG decode failed (maybe image larger than expected)";
-                    decode_ok = false;
-                }
+        if (buf_ptr && jpeg_size >= 3 && buf_ptr[0]==0xFF && buf_ptr[1]==0xD8 && buf_ptr[2]==0xFF && reusable_decoded) {
+            if (decompress_mjpeg_to_rgb_inplace(buf_ptr, jpeg_size, reusable_decoded, max_decoded_sz, &dec_w, &dec_h, &dec_components) == 0) {
+                decode_ok = true;
             } else {
-                qWarning() << "No reusable decoded buffer available";
-                decode_ok = false;
+                qWarning() << "MJPEG decode failed for this frame (skipping)";
             }
         } else {
-            qWarning() << "Frame did not look like MJPEG (magic missing) size=" << (int)jpeg_size;
+            qWarning() << "Frame not MJPEG or buffer null size=" << (int)jpeg_size;
         }
 
-        if (decode_ok && dec_w > 0 && dec_h > 0) {
-            // Create QImage and fill using palette mapping from the decoded RGB
+        if (decode_ok && dec_w > 0 && dec_h > 0 && reusable_decoded) {
             QImage img(WIDTH, HEIGHT, QImage::Format_ARGB32);
             int mode_idx = m_palette_atomic.load();
             if (mode_idx < 0) mode_idx = 0;
             if (mode_idx >= NUM_PALETTES) mode_idx %= NUM_PALETTES;
             uint32_t *lut = palette_lut[mode_idx];
 
-            int row_stride = dec_w * dec_components; // should be dec_w * 3
+            qDebug() << "[CaptureThread] frame loop using palette idx =" << mode_idx << "(" << paletteName(mode_idx) << ")";
+
+            int row_stride = dec_w * dec_components;
             for (int y = 0; y < HEIGHT; ++y) {
                 uint32_t *dest = reinterpret_cast<uint32_t*>(img.scanLine(y));
                 if (y < dec_h) {
                     uint8_t *src_row = reusable_decoded + y * row_stride;
                     for (int x = 0; x < WIDTH; ++x) {
                         if (x < dec_w) {
-                            uint8_t r = src_row[x * dec_components + 0];
-                            uint8_t g = src_row[x * dec_components + 1];
-                            uint8_t b = src_row[x * dec_components + 2];
-                            // integer fast luminance approx: (19595*r + 38470*g + 7471*b) >> 16
+                            uint8_t r = src_row[x*dec_components + 0];
+                            uint8_t g = src_row[x*dec_components + 1];
+                            uint8_t b = src_row[x*dec_components + 2];
                             uint8_t lum = (uint8_t)(((19595u * r + 38470u * g + 7471u * b) >> 16) & 0xFFu);
                             dest[x] = lut[lum];
                         } else {
@@ -337,35 +337,39 @@ void CaptureThread::run()
             }
 
             emit frameReady(img);
-        } else {
-            // skip frame (avoid malloc); optionally track stats
         }
 
-        // Re-queue the buffer
         if (ioctl(v4l2_fd, VIDIOC_QBUF, &dq) < 0) {
-            qWarning() << "VIDIOC_QBUF failed:" << strerror(errno);
+            qWarning() << "VIDIOC_QBUF failed when requeueing:" << strerror(errno);
             break;
         }
 
-        // small sleep to throttle (optional)
+        // throttle
         struct timespec ts = {0, 16666 * 1000};
-        nanosleep(&ts, NULL);
+        nanosleep(&ts, nullptr);
     }
 
-    // Stop streaming
+    // shutdown safe
+    qDebug() << "[CaptureThread] stopping stream and cleaning up";
+
     int type_off = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     ioctl(v4l2_fd, VIDIOC_STREAMOFF, &type_off);
 
-    // cleanup mapped buffers
-    for (uint32_t i = 0; i < req.count; ++i) {
-        if (mapped_ptrs[i] && bufs[i].length) munmap(mapped_ptrs[i], bufs[i].length);
+    // unmap and free only if those pointers were allocated
+    for (uint32_t i = 0; i < (uint32_t)req.count; ++i) {
+        if (mapped_ptrs && mapped_ptrs[i]) {
+            if (bufs && bufs[i].length) munmap(mapped_ptrs[i], bufs[i].length);
+            mapped_ptrs[i] = nullptr;
+        }
     }
-    free(bufs);
-    free(mapped_ptrs);
+    free(bufs); bufs = nullptr;
 
-    if (reusable_decoded) free(reusable_decoded);
+    if (mapped_ptrs) { free(mapped_ptrs); mapped_ptrs = nullptr; }
+
+    if (reusable_decoded) { free(reusable_decoded); reusable_decoded = nullptr; }
 
     cleanup();
+    qDebug() << "[CaptureThread] run() exit";
 }
 
 void CaptureThread::cleanup()
@@ -376,10 +380,11 @@ void CaptureThread::cleanup()
         gb = nullptr;
     }
 
-    if (video_buffer != MAP_FAILED && buf_length > 0) {
+    if (video_buffer != MAP_FAILED && buf_length > 0 && video_buffer != nullptr) {
         munmap(video_buffer, buf_length);
         video_buffer = MAP_FAILED;
     }
+
     if (v4l2_fd >= 0) {
         close(v4l2_fd);
         v4l2_fd = -1;

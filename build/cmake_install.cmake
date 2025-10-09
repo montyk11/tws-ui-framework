@@ -1,4 +1,4 @@
-# Install script for directory: /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt
+# Install script for directory: /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -12,7 +12,7 @@ if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
     string(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
            CMAKE_INSTALL_CONFIG_NAME "${BUILD_TYPE}")
   else()
-    set(CMAKE_INSTALL_CONFIG_NAME "Release")
+    set(CMAKE_INSTALL_CONFIG_NAME "")
   endif()
   message(STATUS "Install configuration: \"${CMAKE_INSTALL_CONFIG_NAME}\"")
 endif()
@@ -49,7 +49,7 @@ if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/simple_qt_app"
          RPATH "")
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/simple_qt_app")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/simple_qt_app")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/simple_qt_app" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/simple_qt_app")
     if(CMAKE_INSTALL_DO_STRIP)
@@ -59,7 +59,7 @@ if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  include("/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/simple_qt_app.dir/install-cxx-module-bmi-Release.cmake" OPTIONAL)
+  include("/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/CMakeFiles/simple_qt_app.dir/install-cxx-module-bmi-noconfig.cmake" OPTIONAL)
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -70,5 +70,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

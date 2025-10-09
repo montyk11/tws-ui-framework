@@ -53,10 +53,10 @@ RM = /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt
+CMAKE_SOURCE_DIR = /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build
+CMAKE_BINARY_DIR = /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build
 
 # Utility rule file for simple_qt_app_autogen_timestamp_deps.
 
@@ -66,8 +66,8 @@ include CMakeFiles/simple_qt_app_autogen_timestamp_deps.dir/compiler_depend.make
 # Include the progress variables for this target.
 include CMakeFiles/simple_qt_app_autogen_timestamp_deps.dir/progress.make
 
-CMakeFiles/simple_qt_app_autogen_timestamp_deps: /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/lib/libQt6Widgets.so.6.6.3
 CMakeFiles/simple_qt_app_autogen_timestamp_deps: /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/x86_64-ostl_sdk-linux/usr/libexec/uic
+CMakeFiles/simple_qt_app_autogen_timestamp_deps: /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/lib/libQt6Widgets.so.6.6.3
 CMakeFiles/simple_qt_app_autogen_timestamp_deps: /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/x86_64-ostl_sdk-linux/usr/libexec/moc
 
 simple_qt_app_autogen_timestamp_deps: CMakeFiles/simple_qt_app_autogen_timestamp_deps
@@ -83,6 +83,6 @@ CMakeFiles/simple_qt_app_autogen_timestamp_deps.dir/clean:
 .PHONY : CMakeFiles/simple_qt_app_autogen_timestamp_deps.dir/clean
 
 CMakeFiles/simple_qt_app_autogen_timestamp_deps.dir/depend:
-	cd /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/simple_qt_app_autogen_timestamp_deps.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build /home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/008Qt/build/CMakeFiles/simple_qt_app_autogen_timestamp_deps.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/simple_qt_app_autogen_timestamp_deps.dir/depend
 
