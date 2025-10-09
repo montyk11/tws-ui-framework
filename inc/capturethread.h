@@ -1,3 +1,4 @@
+//capturethread.h
 #pragma once
 
 #include <QThread>

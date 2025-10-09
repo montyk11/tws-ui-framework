@@ -1,21 +1,28 @@
+#pragma once
 
 #include <QMainWindow>
 #include <QLabel>
 #include <QTimer>
 #include <QStringList>
 #include <QStack>
+#include <QMap>
+#include <QList>
+#include <atomic>
 #include "OverlayLabel.h"
 
 class QPainter;
 class QImage;
+class QCloseEvent;
+class QKeyEvent;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
+    // expose reference to global atomic (defined in mainwindow.cpp)
     static std::atomic<int> &palette_mode_atomic();
 
 protected:
@@ -29,10 +36,7 @@ private slots:
     void onImuDataReady(float pitch, float roll, float yaw);
 
 private:
-    QStack<QString> m_menuHistory;
-    QWidget *m_currentMenuWidget; // Points to the currently visible menu widget
-    // overlay/menu helpers
-    // void drawMenuOverlay(QPainter &p, QImage &image); // <-- painter-forwarding signature
+    // menu/navigation helpers
     void handleAction(const QString &item);
     void enterMenuItem(const QString &item);
     void enterSubMenuItem(const QString &item);
@@ -40,31 +44,44 @@ private:
     void buildSubMenu(const QString &menuName);
     void updateMenuHighlight();
     void updateSubMenuHighlight();
-    // QLabel *m_label;
+
+    // zoom helpers
+    QImage applyZoomToImage(const QImage &src, int zoomLevel);
+    QString sanitizeMenuItem(const QString &raw);
+    int findPaletteIndexByName(const QString &name);
+
+    // UI widgets
     OverlayLabel *m_label;
+    QLabel *m_zoomLabel;           // top-left zoom label
     class CaptureThread *m_capture;
     QTimer *m_overlayTimer;
 
     // menu state
-    bool m_menuVisible;
+    QStack<QString> m_menuHistory;
+    QWidget *m_currentMenuWidget = nullptr;
+    QWidget *m_menuWidget = nullptr;
+    QWidget *m_subMenuWidget = nullptr;
+    bool m_menuVisible = false;
     QStringList m_menuItems;
-    QStringList m_paletteItems;
+    QMap<QString, QStringList> m_subMenus;
+    QList<QLabel*> m_menuLabels;
+    QList<QLabel*> m_subMenuLabels;
     int m_menuIndex = 0;
-    int m_paletteIndex = 0;
-    int m_currentPalette = 0;
     bool m_inSubmenu = false;
     int m_subMenuIndex = 0;
 
-    QWidget *m_menuWidget;       // new menu overlay
-    QWidget *m_subMenuWidget;
-    QMap<QString, QStringList> m_subMenus;
-    QList<QLabel*> m_menuLabels; // for highlighting
-    QList<QLabel*> m_subMenuLabels;
+    // palette state
+    QStringList m_paletteItems;
+    int m_paletteIndex = 0;
+    int m_currentPalette = 0;
 
+    // IMU
     float m_pitch = 0.0f;
     float m_roll = 0.0f;
     float m_yaw = 0.0f;
 
-
-
+    // zoom state
+    const QList<int> m_zoomLevels = {1, 2, 4}; // cycle order
+    int m_zoomIndex = 0;                       // index into m_zoomLevels
+    int m_currentZoom = 1;                     // current zoom magnitude
 };

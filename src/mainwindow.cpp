@@ -1,4 +1,3 @@
-// mainwindow.cpp (ready-to-paste)
 #include "mainwindow.h"
 #include "capturethread.h"
 #include <QVBoxLayout>
@@ -6,14 +5,10 @@
 #include <QPainter>
 #include <QDebug>
 #include <QCoreApplication>
-#include <atomic>
 #include <QMetaObject>
-#include <QMetaType>
 #include <algorithm>
-#include <QStringList>
-#include <QRegularExpression>
 
-// make the GUI global visible to other translation units (not static)
+// global palette atomic (single definition used by capturethread as extern)
 std::atomic<int> palette_mode_global{0};
 std::atomic<int> &MainWindow::palette_mode_atomic() { return palette_mode_global; }
 
@@ -29,26 +24,23 @@ static const QStringList kPaletteNames = {
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       m_label(new OverlayLabel(this)),
+      m_zoomLabel(new QLabel(m_label)),
       m_capture(new CaptureThread(palette_mode_global, this)),
-      m_overlayTimer(new QTimer(this)),
-      m_menuVisible(false)
+      m_overlayTimer(new QTimer(this))
 {
+    // central widget and basic style
     setCentralWidget(m_label);
     m_label->setAlignment(Qt::AlignCenter);
     m_label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_label->setStyleSheet("background: black;");
 
-    // menu initialization
+    // build menus (same items you had)
     m_menuItems = QStringList{"Image", "Reticle", "Features", "Battery", "Settings", "Exit", "Power Off"};
-
-    // submenu - clean strings
     m_subMenus["Image"]     = {"Brightness", "Contrast", "Filter", "Palette", "Back"};
     m_subMenus["Brightness"] = {"-  50  +", "Back"};
     m_subMenus["Contrast"] = {"-  50  +", "Back"};
     m_subMenus["Filter"] = {"Sharp", "Smooth", "Normal", "Back"};
     m_subMenus["Palette"] = {"IRONBOW", "RAINBOW", "ARCTIC", "LAVA", "BLACKHOT", "WHITEHOT", "Back"};
-
-    // other submenus
     m_subMenus["Reticle"] = {"Profiles", "Type", "Zeroing", "Red Dot", "On/Off", "Back"};
     m_subMenus["Profiles"] = {"<  2  >", "Back"};
     m_subMenus["Type"] = {"Crosshair", "7_62x51", "5_45x39", "7_63x45", "7_62x39", "Back"};
@@ -77,10 +69,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_menuWidget->setGeometry(320, 5, 160, 230);
     m_menuWidget->setStyleSheet("background: rgba(0,0,0,160); border-radius: 4px;");
 
-    // Vertical layout for menu
     QVBoxLayout *menuLayout = new QVBoxLayout(m_menuWidget);
     menuLayout->setContentsMargins(5, 5, 5, 5);
-
     for (const QString &item : m_menuItems) {
         QLabel *lbl = new QLabel(item, m_menuWidget);
         lbl->setStyleSheet("color: white; font: 14px 'Sans';");
@@ -97,25 +87,31 @@ MainWindow::MainWindow(QWidget *parent)
     subLayout->setContentsMargins(5,5,5,5);
     m_subMenuWidget->hide();
 
-    // Use queued connection for cross-thread signal delivery
+    // zoom label (top-left)
+    m_zoomLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
+    m_zoomLabel->setStyleSheet("color: white; background: rgba(0,0,0,128); padding: 4px; border-radius: 4px; font: bold 14px 'Sans';");
+    m_zoomLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    m_zoomLabel->setGeometry(8, 8, 140, 28);
+    m_zoomLabel->show();
+    m_zoomLabel->setText(QString("Zoom: %1×").arg(m_currentZoom));
+    m_zoomLabel->raise();
+
+    // Connect capture thread signals
     connect(m_capture, &CaptureThread::frameReady, this, &MainWindow::onFrameReady, Qt::QueuedConnection);
     connect(m_capture, &CaptureThread::paletteIndexChanged, this, &MainWindow::onPaletteChanged, Qt::QueuedConnection);
-
-    // connect gpio events forwarded by CaptureThread
     connect(m_capture, &CaptureThread::gpioPressed, this, &MainWindow::onGpioPressed, Qt::QueuedConnection);
 
     qDebug() << "[MainWindow] m_capture pointer:" << m_capture;
-
     m_capture->start();
 
-    // quick sanity: set palette to 0 initially (keeps UI consistent)
+    // sync palette
     palette_mode_global.store(0);
     m_currentPalette = (int)palette_mode_global.load();
     m_paletteIndex = m_currentPalette;
 
-    // optional: timer to refresh overlay if you want blinking etc.
+    // overlay timer (if you need periodic overlay updates)
     m_overlayTimer->setInterval(1000/30);
-    connect(m_overlayTimer, &QTimer::timeout, [this](){ /* no-op: frames drive repaint */ });
+    connect(m_overlayTimer, &QTimer::timeout, [this](){});
     m_overlayTimer->start();
 }
 
@@ -126,52 +122,37 @@ MainWindow::~MainWindow()
     }
 }
 
-void MainWindow::onImuDataReady(float pitch, float roll, float yaw) {
-    Q_UNUSED(pitch); Q_UNUSED(roll); Q_UNUSED(yaw);
-    m_label->update();
-}
-
-void MainWindow::updateMenuHighlight()
-{
-    for (int i = 0; i < m_menuLabels.size(); ++i) {
-        if (i == m_menuIndex) {
-            m_menuLabels[i]->setStyleSheet(
-                "background-color: rgba(235, 109, 25, 181);"
-                "color: white;"
-                "font: bold 14px 'Sans';"
-                "padding: 4px;"
-                "border-radius: 4px;");
-        } else {
-            m_menuLabels[i]->setStyleSheet(
-                "background-color: transparent;"
-                "color: white;"
-                "font: 14px 'Sans';"
-                "padding: 4px;");
-        }
-    }
-}
-
-void MainWindow::updateSubMenuHighlight()
-{
-    for (int i = 0; i < m_subMenuLabels.size(); ++i) {
-        if (i == m_subMenuIndex) {
-            m_subMenuLabels[i]->setStyleSheet(
-                "background-color: rgba(235, 109, 25, 181);"
-                "color: white; font: bold 14px 'Sans'; padding: 4px; border-radius: 4px;");
-        } else {
-            m_subMenuLabels[i]->setStyleSheet(
-                "background-color: transparent;"
-                "color: white; font: 14px 'Sans'; padding: 4px;");
-        }
-    }
-}
-
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    if (m_capture) {
-        m_capture->stopAndWait();
-    }
+    if (m_capture) m_capture->stopAndWait();
     QMainWindow::closeEvent(event);
+}
+
+/*
+ * applyZoomToImage:
+ *  - center-crops the source image by the integer zoom factor (1,2,4...)
+ *  - scales the cropped region to the display label size, preserving aspect ratio
+ */
+QImage MainWindow::applyZoomToImage(const QImage &src, int zoomLevel)
+{
+    if (src.isNull() || zoomLevel <= 1) return src;
+
+    int W = src.width();
+    int H = src.height();
+
+    // compute crop size for integer zoom (e.g. 2x => half width/height)
+    int cropW = std::max(1, W / zoomLevel);
+    int cropH = std::max(1, H / zoomLevel);
+
+    int cropX = (W - cropW) / 2;
+    int cropY = (H - cropH) / 2;
+
+    QImage cropped = src.copy(cropX, cropY, cropW, cropH);
+
+    QSize target = m_label->size();
+    if (target.width() <= 0 || target.height() <= 0) return cropped;
+
+    return cropped.scaled(target, Qt::KeepAspectRatio, Qt::FastTransformation);
 }
 
 void MainWindow::onFrameReady(const QImage &img)
@@ -182,30 +163,45 @@ void MainWindow::onFrameReady(const QImage &img)
     }
 
     static std::atomic<bool> busy{false};
-    if (busy.exchange(true)) {
-        // skip this frame
+    if (busy.exchange(true)) { // if already busy, skip frame
         return;
     }
 
-    QImage display = img.copy();
+    // Apply zoom on the GUI side:
+    QImage processed;
+    if (m_currentZoom <= 1) {
+        // simply scale whole frame to label
+        processed = img.scaled(m_label->size(), Qt::KeepAspectRatio, Qt::FastTransformation);
+    } else {
+        // center-crop to zoom and then scale to label
+        processed = applyZoomToImage(img, m_currentZoom);
+    }
 
+    // draw overlays directly onto processed image
     QPainter p;
-    if (!p.begin(&display)) {
+    if (!p.begin(&processed)) {
         qWarning() << "onFrameReady: QPainter::begin() failed";
         busy.store(false);
         return;
     }
 
-    // Draw palette name (bottom right)
+    // palette name bottom-right (example placement)
     p.setPen(Qt::white);
     p.setFont(QFont("Monospace", 12, QFont::Bold));
     int currentIdx = (int)palette_mode_global.load();
     QString name = CaptureThread::paletteName(currentIdx);
-    p.drawText(550, 470, QString("Palette: %1 (%2)").arg(name).arg(currentIdx));
+    p.drawText(processed.width() - 220, processed.height() - 10, QString("Palette: %1 (%2)").arg(name).arg(currentIdx));
 
     p.end();
 
-    m_label->setPixmap(QPixmap::fromImage(display).scaled(m_label->size(), Qt::KeepAspectRatio));
+    // set pixmap onto overlay label
+    m_label->setPixmap(QPixmap::fromImage(processed));
+
+    // update zoom label text and raise it above image
+    if (m_zoomLabel) {
+        m_zoomLabel->setText(QString("Zoom: %1×").arg(m_currentZoom));
+        m_zoomLabel->raise();
+    }
 
     busy.store(false);
 }
@@ -217,34 +213,20 @@ void MainWindow::onPaletteChanged(int idx)
     qDebug() << "[MainWindow] onPaletteChanged idx =" << idx << "name:" << CaptureThread::paletteName(idx);
 }
 
-// sanitize item text coming from various code paths (strip whitespace, remove surrounding quotes)
-static QString sanitizeMenuItem(const QString &raw)
+QString MainWindow::sanitizeMenuItem(const QString &raw)
 {
     QString s = raw.trimmed();
-
-    // Remove surrounding double quotes if present: "RAINBOW" -> RAINBOW
-    if (s.size() >= 2 && s.front() == '"' && s.back() == '"') {
-        s = s.mid(1, s.size() - 2).trimmed();
-    }
-
-    // Also remove surrounding single quotes if present
-    if (s.size() >= 2 && s.front() == '\'' && s.back() == '\'') {
-        s = s.mid(1, s.size() - 2).trimmed();
-    }
-
-    // collapse multiple spaces
+    if (s.size() >= 2 && s.front() == '"' && s.back() == '"') s = s.mid(1, s.size() - 2).trimmed();
+    if (s.size() >= 2 && s.front() == '\'' && s.back() == '\'') s = s.mid(1, s.size() - 2).trimmed();
     s = s.simplified();
-
     return s;
 }
 
-static int findPaletteIndexByName(const QString &name)
+int MainWindow::findPaletteIndexByName(const QString &name)
 {
     QString s = sanitizeMenuItem(name);
     for (int i = 0; i < kPaletteNames.size(); ++i) {
-        if (s.compare(kPaletteNames[i], Qt::CaseInsensitive) == 0) {
-            return i;
-        }
+        if (s.compare(kPaletteNames[i], Qt::CaseInsensitive) == 0) return i;
     }
     return -1;
 }
@@ -253,41 +235,68 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if (!event) return;
     int k = event->key();
+
+    // quick numeric palette selection
     if (k >= Qt::Key_0 && k <= Qt::Key_5) {
         int idx = k - Qt::Key_0;
         qDebug() << "[MainWindow] key pressed, palette idx:" << idx;
         palette_mode_global.store(idx);
         bool invoked = QMetaObject::invokeMethod(m_capture, "setPaletteIndex", Qt::QueuedConnection, Q_ARG(int, idx));
         qDebug() << "[MainWindow] invokeMethod(setPaletteIndex) returned" << invoked << "for idx" << idx;
-        if (!invoked) qWarning() << "[MainWindow] invokeMethod failed — slot not registered";
     } else if (k == Qt::Key_Q || k == Qt::Key_Escape) {
         close();
+    } else if (k == Qt::Key_Z) {
+        // test keyboard zoom cycle: 1x->2x->4x->1x
+        m_zoomIndex = (m_zoomIndex + 1) % m_zoomLevels.size();
+        m_currentZoom = m_zoomLevels.at(m_zoomIndex);
+        if (m_zoomLabel) m_zoomLabel->setText(QString("Zoom: %1×").arg(m_currentZoom));
+        qDebug() << "[MainWindow] keyboard zoom cycle to" << m_currentZoom << "x";
     } else {
         QMainWindow::keyPressEvent(event);
     }
 }
 
-void MainWindow::onGpioPressed(unsigned int offset, int value) {
+/*
+ * onGpioPressed:
+ * - When menu is NOT visible, PF0 cycles zoom levels (1x->2x->4x->1x).
+ * - When menu IS visible, PF0/PF1/PF6 behave as menu navigation as before.
+ */
+void MainWindow::onGpioPressed(unsigned int offset, int value)
+{
     qDebug() << "[GPIO] offset:" << offset << "value:" << value;
-    
-    if (value != 0) return; // Only process button press
+    if (value != 0) return; // only on press
 
-    const unsigned int PF0 = 0; // Up
+    const unsigned int PF0 = 0; // Up (or zoom when menu hidden)
     const unsigned int PF1 = 1; // Down
     const unsigned int PF6 = 6; // Enter
 
+    // If menu not visible, PF0 cycles zoom
     if (!m_menuVisible) {
+        if (offset == PF0) {
+            m_zoomIndex = (m_zoomIndex + 1) % m_zoomLevels.size();
+            m_currentZoom = m_zoomLevels.at(m_zoomIndex);
+            if (m_zoomLabel) {
+                m_zoomLabel->setText(QString("Zoom: %1×").arg(m_currentZoom));
+                m_zoomLabel->raise();
+            }
+            qDebug() << "[GPIO] PF0 zoom cycled to" << m_currentZoom << "x";
+            return;
+        }
         if (offset == PF6) {
+            // open menu
             qDebug() << "[GPIO] Opening menu";
             m_menuVisible = true;
             m_menuWidget->show();
             m_currentMenuWidget = m_menuWidget;
             m_menuIndex = 0;
             updateMenuHighlight();
+            return;
         }
+        // other buttons no-op when menu hidden
         return;
     }
 
+    // Menu visible: use navigation semantics as before
     if (m_currentMenuWidget == m_menuWidget) {
         if (offset == PF0) {
             m_menuIndex = (m_menuIndex - 1 + m_menuItems.size()) % m_menuItems.size();
@@ -317,7 +326,7 @@ void MainWindow::buildSubMenu(const QString &menuName)
     if (oldLayout) {
         QLayoutItem *child;
         while ((child = oldLayout->takeAt(0)) != nullptr) {
-            delete child->widget();
+            if (child->widget()) delete child->widget();
             delete child;
         }
     }
@@ -439,4 +448,45 @@ void MainWindow::applySelectedPalette()
         if (!invoked) qWarning() << "[applySelectedPalette] invokeMethod failed";
         m_currentPalette = idx;
     }
+}
+
+void MainWindow::updateMenuHighlight()
+{
+    for (int i = 0; i < m_menuLabels.size(); ++i) {
+        if (i == m_menuIndex) {
+            m_menuLabels[i]->setStyleSheet(
+                "background-color: rgba(235, 109, 25, 181);"
+                "color: white;"
+                "font: bold 14px 'Sans';"
+                "padding: 4px;"
+                "border-radius: 4px;");
+        } else {
+            m_menuLabels[i]->setStyleSheet(
+                "background-color: transparent;"
+                "color: white;"
+                "font: 14px 'Sans';"
+                "padding: 4px;");
+        }
+    }
+}
+
+void MainWindow::updateSubMenuHighlight()
+{
+    for (int i = 0; i < m_subMenuLabels.size(); ++i) {
+        if (i == m_subMenuIndex) {
+            m_subMenuLabels[i]->setStyleSheet(
+                "background-color: rgba(235, 109, 25, 181);"
+                "color: white; font: bold 14px 'Sans'; padding: 4px; border-radius: 4px;");
+        } else {
+            m_subMenuLabels[i]->setStyleSheet(
+                "background-color: transparent;"
+                "color: white; font: 14px 'Sans'; padding: 4px;");
+        }
+    }
+}
+
+void MainWindow::onImuDataReady(float pitch, float roll, float yaw)
+{
+    Q_UNUSED(pitch); Q_UNUSED(roll); Q_UNUSED(yaw);
+    m_label->update();
 }

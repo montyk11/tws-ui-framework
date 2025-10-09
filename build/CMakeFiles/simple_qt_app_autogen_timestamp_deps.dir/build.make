@@ -66,8 +66,8 @@ include CMakeFiles/simple_qt_app_autogen_timestamp_deps.dir/compiler_depend.make
 # Include the progress variables for this target.
 include CMakeFiles/simple_qt_app_autogen_timestamp_deps.dir/progress.make
 
-CMakeFiles/simple_qt_app_autogen_timestamp_deps: /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/x86_64-ostl_sdk-linux/usr/libexec/uic
 CMakeFiles/simple_qt_app_autogen_timestamp_deps: /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/cortexa7t2hf-neon-vfpv4-ostl-linux-gnueabi/usr/lib/libQt6Widgets.so.6.6.3
+CMakeFiles/simple_qt_app_autogen_timestamp_deps: /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/x86_64-ostl_sdk-linux/usr/libexec/uic
 CMakeFiles/simple_qt_app_autogen_timestamp_deps: /home/vedant/STM32MPU_workspace/STM32MPU-Ecosystem-v6.0.0/Developer-Packege/SDK/sysroots/x86_64-ostl_sdk-linux/usr/libexec/moc
 
 simple_qt_app_autogen_timestamp_deps: CMakeFiles/simple_qt_app_autogen_timestamp_deps
