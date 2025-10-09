@@ -1,0 +1,9 @@
+/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/simple_qt_app.dir
+/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/edit_cache.dir
+/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/rebuild_cache.dir
+/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/list_install_components.dir
+/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/install.dir
+/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/install/local.dir
+/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/install/strip.dir
+/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/simple_qt_app_autogen_timestamp_deps.dir
+/home/vedant/STM32MPU_workspace/TWS_Development/TWS_Linux_Application/007Qt/build/CMakeFiles/simple_qt_app_autogen.dir
