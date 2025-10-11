@@ -1,0 +1,5 @@
+# Hashes of file build rules.
+a828b56397ed77a40d1d22ce1be24445 .rcc/qrc_resources.cpp
+d9fe1158065d75c2a26e951fef068aaa CMakeFiles/simple_qt_app_autogen
+d9fe1158065d75c2a26e951fef068aaa CMakeFiles/simple_qt_app_autogen_timestamp_deps
+9f9c38368dfc7e9dfea18f093a61734c simple_qt_app_autogen/timestamp

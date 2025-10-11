@@ -1,0 +1,10 @@
+/home/rnd/STM32MP157F-DK2_Starter/007Qt/build/CMakeFiles/simple_qt_app.dir
+/home/rnd/STM32MP157F-DK2_Starter/007Qt/build/CMakeFiles/simple_qt_app_other_files.dir
+/home/rnd/STM32MP157F-DK2_Starter/007Qt/build/CMakeFiles/edit_cache.dir
+/home/rnd/STM32MP157F-DK2_Starter/007Qt/build/CMakeFiles/rebuild_cache.dir
+/home/rnd/STM32MP157F-DK2_Starter/007Qt/build/CMakeFiles/list_install_components.dir
+/home/rnd/STM32MP157F-DK2_Starter/007Qt/build/CMakeFiles/install.dir
+/home/rnd/STM32MP157F-DK2_Starter/007Qt/build/CMakeFiles/install/local.dir
+/home/rnd/STM32MP157F-DK2_Starter/007Qt/build/CMakeFiles/install/strip.dir
+/home/rnd/STM32MP157F-DK2_Starter/007Qt/build/CMakeFiles/simple_qt_app_autogen_timestamp_deps.dir
+/home/rnd/STM32MP157F-DK2_Starter/007Qt/build/CMakeFiles/simple_qt_app_autogen.dir

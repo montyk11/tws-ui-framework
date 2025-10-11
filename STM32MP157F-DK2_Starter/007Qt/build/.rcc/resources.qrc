@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/">
+    <file alias="res/logo.png">/home/rnd/STM32MP157F-DK2_Starter/007Qt/res/logo.png</file>
+    <file alias="res/battery.png">/home/rnd/STM32MP157F-DK2_Starter/007Qt/res/battery.png</file>
+  </qresource>
+</RCC>
+
